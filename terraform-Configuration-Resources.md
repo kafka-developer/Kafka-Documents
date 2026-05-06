@@ -1,4 +1,7 @@
-# Kafka Interview Revision — Simple Answers With Commands
+itten with [StackEdit](https://stackedit.io/).
+#
+ Kafka Interview Revision — Simple Answers With Commands
+
 
 ## Zookeeper
 
@@ -74,6 +77,7 @@ Example:
 /controller
 /admin/delete_topics
 ```
+
 
 Kafka stores cluster metadata in these zNodes.
 
@@ -1523,5 +1527,5 @@ ssl.truststore.location=/path/client.truststore.jks
 ssl.truststore.password=password
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE3NTY5ODQ5NTddfQ==
+eyJoaXN0b3J5IjpbLTI5NTU1MTM5MCwtMTc1Njk4NDk1N119
 -->
