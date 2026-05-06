@@ -11,6 +11,7 @@ resource "aws_instance" "web" {
   ami           = "ami-123456"
   instance_type = "t2.micro"
 }
+
 ```
 
 Resource examples:
@@ -27,6 +28,7 @@ Kafka topics
 Databases
 Storage buckets
 Kubernetes objects
+
 ```
 
 Terraform manages resources through:
@@ -35,9 +37,10 @@ Terraform manages resources through:
 configuration file  → desired state
 state file          → Terraform’s tracking record
 real infrastructure → actual object in cloud/platform
+
 ```
 
----
+----------
 
 ## 2. Resource Types Depend on Providers
 
@@ -56,6 +59,7 @@ terraform {
     }
   }
 }
+
 ```
 
 Then you can use Amazon Web Services resources:
@@ -64,6 +68,7 @@ Then you can use Amazon Web Services resources:
 resource "aws_s3_bucket" "logs" {
   bucket = "my-log-bucket"
 }
+
 ```
 
 Without the provider, Terraform does not understand:
@@ -72,9 +77,10 @@ Without the provider, Terraform does not understand:
 aws_s3_bucket
 aws_instance
 aws_vpc
+
 ```
 
----
+----------
 
 ## 3. What is a Provider?
 
@@ -91,6 +97,7 @@ Confluent provider
 Datadog provider
 GitHub provider
 VMware provider
+
 ```
 
 Provider configuration example:
@@ -99,6 +106,7 @@ Provider configuration example:
 provider "aws" {
   region = "us-east-1"
 }
+
 ```
 
 Confluent-style example:
@@ -108,6 +116,7 @@ provider "confluent" {
   cloud_api_key    = var.confluent_cloud_api_key
   cloud_api_secret = var.confluent_cloud_api_secret
 }
+
 ```
 
 Provider job:
@@ -117,9 +126,10 @@ Terraform says: create this resource
 Provider says: I know how to call the platform Application Programming Interface
 Platform creates/updates/deletes the object
 Terraform records result in state
+
 ```
 
----
+----------
 
 ## 4. Add a Resource Block
 
@@ -130,6 +140,7 @@ resource "<resource_type>" "<local_name>" {
   argument1 = value
   argument2 = value
 }
+
 ```
 
 Example:
@@ -139,12 +150,14 @@ resource "aws_instance" "app_server" {
   ami           = "ami-123456"
   instance_type = "t3.micro"
 }
+
 ```
 
 Resource address:
 
 ```bash
 aws_instance.app_server
+
 ```
 
 That address is used in commands like:
@@ -153,6 +166,7 @@ That address is used in commands like:
 terraform state show aws_instance.app_server
 terraform taint aws_instance.app_server
 terraform state rm aws_instance.app_server
+
 ```
 
 For `for_each`:
@@ -164,6 +178,7 @@ resource "aws_instance" "app" {
   ami           = "ami-123456"
   instance_type = "t3.micro"
 }
+
 ```
 
 Address examples:
@@ -172,9 +187,10 @@ Address examples:
 aws_instance.app["dev"]
 aws_instance.app["qa"]
 aws_instance.app["prod"]
+
 ```
 
----
+----------
 
 ## 5. Resource Arguments and Meta-Arguments
 
@@ -189,6 +205,7 @@ resource "aws_instance" "web" {
   ami           = "ami-123456"
   instance_type = "t3.micro"
 }
+
 ```
 
 Here:
@@ -196,6 +213,7 @@ Here:
 ```text
 ami
 instance_type
+
 ```
 
 are specific to `aws_instance`.
@@ -211,6 +229,7 @@ resource "confluent_kafka_topic" "orders" {
   topic_name       = "orders"
   partitions_count = 6
 }
+
 ```
 
 Here:
@@ -219,11 +238,12 @@ Here:
 topic_name
 partitions_count
 kafka_cluster
+
 ```
 
 are provider/resource-specific.
 
----
+----------
 
 ### Terraform meta-arguments
 
@@ -237,6 +257,7 @@ count
 for_each
 provider
 lifecycle
+
 ```
 
 Example with `depends_on`:
@@ -248,6 +269,7 @@ resource "aws_instance" "web" {
 
   depends_on = [aws_security_group.web_sg]
 }
+
 ```
 
 Example with `count`:
@@ -259,6 +281,7 @@ resource "aws_instance" "web" {
   ami           = "ami-123456"
   instance_type = "t3.micro"
 }
+
 ```
 
 Addresses:
@@ -267,6 +290,7 @@ Addresses:
 aws_instance.web[0]
 aws_instance.web[1]
 aws_instance.web[2]
+
 ```
 
 Example with `for_each`:
@@ -277,6 +301,7 @@ resource "aws_s3_bucket" "buckets" {
 
   bucket = "my-${each.key}-bucket"
 }
+
 ```
 
 Example with `lifecycle`:
@@ -290,6 +315,7 @@ resource "aws_instance" "web" {
     prevent_destroy = true
   }
 }
+
 ```
 
 Another lifecycle example:
@@ -298,6 +324,7 @@ Another lifecycle example:
 lifecycle {
   create_before_destroy = true
 }
+
 ```
 
 Exam line:
@@ -305,9 +332,10 @@ Exam line:
 ```text
 Arguments configure the resource.
 Meta-arguments configure Terraform’s behavior around the resource.
+
 ```
 
----
+----------
 
 ## 6. Initialize a New Terraform Project
 
@@ -315,6 +343,7 @@ When starting a new Terraform project, run:
 
 ```bash
 terraform init
+
 ```
 
 This does:
@@ -325,6 +354,7 @@ Downloads modules
 Initializes backend
 Creates .terraform directory
 Creates or updates .terraform.lock.hcl
+
 ```
 
 Typical workflow:
@@ -334,17 +364,19 @@ terraform init
 terraform validate
 terraform plan
 terraform apply
+
 ```
 
 Useful command:
 
 ```bash
 terraform providers
+
 ```
 
 Shows providers used by the configuration.
 
----
+----------
 
 ## 7. Reinitialize After Provider or Module Changes
 
@@ -352,18 +384,21 @@ If you change providers, provider versions, modules, or backend configuration, r
 
 ```bash
 terraform init
+
 ```
 
 If provider versions changed:
 
 ```bash
 terraform init -upgrade
+
 ```
 
 If backend changed:
 
 ```bash
 terraform init -reconfigure
+
 ```
 
 Example provider version change:
@@ -377,21 +412,24 @@ terraform {
     }
   }
 }
+
 ```
 
 Then:
 
 ```bash
 terraform init -upgrade
+
 ```
 
 Exam line:
 
 ```text
 init is not only for new projects. You run it again when providers, modules, or backend settings change.
+
 ```
 
----
+----------
 
 ## 8. Apply the Configuration
 
@@ -399,6 +437,7 @@ Main command:
 
 ```bash
 terraform apply
+
 ```
 
 Safer workflow:
@@ -406,6 +445,7 @@ Safer workflow:
 ```bash
 terraform plan
 terraform apply
+
 ```
 
 Save a plan:
@@ -413,12 +453,14 @@ Save a plan:
 ```bash
 terraform plan -out=tfplan
 terraform apply tfplan
+
 ```
 
 Destroy:
 
 ```bash
 terraform destroy
+
 ```
 
 Auto-approve:
@@ -426,6 +468,7 @@ Auto-approve:
 ```bash
 terraform apply -auto-approve
 terraform destroy -auto-approve
+
 ```
 
 But for exam and real production:
@@ -434,9 +477,10 @@ But for exam and real production:
 plan first
 review
 then apply
+
 ```
 
----
+----------
 
 ## 9. What Happens During Terraform Apply?
 
@@ -446,11 +490,12 @@ Terraform compares three things:
 Configuration       = what you want
 State file          = what Terraform thinks it manages
 Real infrastructure = what actually exists
+
 ```
 
 Then it decides what action is needed.
 
----
+----------
 
 ### Case 1 — Resource exists in configuration but not in state
 
@@ -460,12 +505,14 @@ Terraform creates it.
 resource "aws_s3_bucket" "logs" {
   bucket = "my-log-bucket"
 }
+
 ```
 
 Command:
 
 ```bash
 terraform apply
+
 ```
 
 Terraform action:
@@ -473,9 +520,10 @@ Terraform action:
 ```text
 Create bucket
 Record bucket in state
+
 ```
 
----
+----------
 
 ### Case 2 — Resource exists in state but removed from configuration
 
@@ -489,6 +537,7 @@ Before:
 resource "aws_s3_bucket" "logs" {
   bucket = "my-log-bucket"
 }
+
 ```
 
 Then you delete/comment out that block.
@@ -497,18 +546,21 @@ Run:
 
 ```bash
 terraform plan
+
 ```
 
 Terraform shows:
 
 ```text
 - destroy aws_s3_bucket.logs
+
 ```
 
 Then:
 
 ```bash
 terraform apply
+
 ```
 
 Terraform deletes the real bucket and removes it from state.
@@ -518,9 +570,10 @@ Important:
 ```text
 Configuration is the Big Boss.
 If configuration says the resource should not exist, Terraform plans to destroy it.
+
 ```
 
----
+----------
 
 ### Case 3 — Resource exists but arguments changed
 
@@ -531,6 +584,7 @@ resource "aws_instance" "web" {
   ami           = "ami-123456"
   instance_type = "t3.micro"
 }
+
 ```
 
 Changed to:
@@ -540,29 +594,33 @@ resource "aws_instance" "web" {
   ami           = "ami-123456"
   instance_type = "t3.small"
 }
+
 ```
 
 Run:
 
 ```bash
 terraform plan
+
 ```
 
 Terraform may show:
 
 ```text
 ~ update in-place
+
 ```
 
 Then:
 
 ```bash
 terraform apply
+
 ```
 
 Terraform updates the resource and updates state.
 
----
+----------
 
 ### Case 4 — Argument changed but cannot be updated in place
 
@@ -573,18 +631,21 @@ Example:
 ```text
 Old object must be destroyed
 New object must be created
+
 ```
 
 Terraform plan shows:
 
 ```text
 -/+ destroy and then create replacement
+
 ```
 
 or:
 
 ```text
 +/- create replacement and then destroy
+
 ```
 
 With lifecycle:
@@ -593,11 +654,12 @@ With lifecycle:
 lifecycle {
   create_before_destroy = true
 }
+
 ```
 
 Terraform tries to create the new resource before destroying the old one.
 
----
+----------
 
 ### Case 5 — State is updated
 
@@ -611,6 +673,7 @@ resource IDs
 attributes
 dependencies
 metadata
+
 ```
 
 Useful commands:
@@ -619,6 +682,7 @@ Useful commands:
 terraform state list
 terraform state show <resource_address>
 terraform show
+
 ```
 
 Example:
@@ -626,9 +690,10 @@ Example:
 ```bash
 terraform state list
 terraform state show aws_instance.web
+
 ```
 
----
+----------
 
 ## 10. Infrastructure Changes Over Time
 
@@ -644,11 +709,12 @@ Rename resources
 Remove resources from state only
 Destroy resources from real infrastructure
 Retire resources from cloud/provider
+
 ```
 
 These are not the same thing.
 
----
+----------
 
 ## 10.1 Add a Resource
 
@@ -658,6 +724,7 @@ Add a new resource block:
 resource "aws_s3_bucket" "logs" {
   bucket = "my-log-bucket"
 }
+
 ```
 
 Run:
@@ -665,11 +732,12 @@ Run:
 ```bash
 terraform plan
 terraform apply
+
 ```
 
 Terraform creates the new infrastructure object.
 
----
+----------
 
 ## 10.2 Remove a Resource from Configuration
 
@@ -679,12 +747,14 @@ If you remove the resource block from `.tf` files:
 # resource "aws_s3_bucket" "logs" {
 #   bucket = "my-log-bucket"
 # }
+
 ```
 
 Run:
 
 ```bash
 terraform plan
+
 ```
 
 Terraform plans:
@@ -692,11 +762,12 @@ Terraform plans:
 ```text
 Destroy the real infrastructure
 Remove it from state
+
 ```
 
 This is the normal behavior.
 
----
+----------
 
 ## 10.3 Create Modules
 
@@ -708,12 +779,14 @@ Instead of repeating this everywhere:
 resource "aws_s3_bucket" "logs" {
   bucket = "app1-logs"
 }
+
 ```
 
 You can create a module:
 
 ```text
 modules/s3_bucket/main.tf
+
 ```
 
 Inside module:
@@ -724,6 +797,7 @@ variable "bucket_name" {}
 resource "aws_s3_bucket" "this" {
   bucket = var.bucket_name
 }
+
 ```
 
 Use module:
@@ -733,6 +807,7 @@ module "logs_bucket" {
   source      = "./modules/s3_bucket"
   bucket_name = "app1-logs"
 }
+
 ```
 
 Commands:
@@ -741,13 +816,14 @@ Commands:
 terraform init
 terraform plan
 terraform apply
+
 ```
 
 Why `init`?
 
 Because modules must be installed/initialized.
 
----
+----------
 
 ## 10.4 Refactor Resources into Modules
 
@@ -759,12 +835,14 @@ Suppose you originally had:
 resource "aws_s3_bucket" "logs" {
   bucket = "app1-logs"
 }
+
 ```
 
 State address:
 
 ```bash
 aws_s3_bucket.logs
+
 ```
 
 Then you move it into a module:
@@ -774,12 +852,14 @@ module "logs_bucket" {
   source      = "./modules/s3_bucket"
   bucket_name = "app1-logs"
 }
+
 ```
 
 New address may become:
 
 ```bash
 module.logs_bucket.aws_s3_bucket.this
+
 ```
 
 Terraform may think:
@@ -787,6 +867,7 @@ Terraform may think:
 ```text
 Old resource removed
 New resource added
+
 ```
 
 So plan may show:
@@ -794,6 +875,7 @@ So plan may show:
 ```text
 Destroy aws_s3_bucket.logs
 Create module.logs_bucket.aws_s3_bucket.this
+
 ```
 
 But you do not want destruction. You only changed Terraform structure.
@@ -805,6 +887,7 @@ moved {
   from = aws_s3_bucket.logs
   to   = module.logs_bucket.aws_s3_bucket.this
 }
+
 ```
 
 Then run:
@@ -812,6 +895,7 @@ Then run:
 ```bash
 terraform plan
 terraform apply
+
 ```
 
 Terraform updates the state address without destroying the real resource.
@@ -820,15 +904,17 @@ Older/manual way:
 
 ```bash
 terraform state mv aws_s3_bucket.logs module.logs_bucket.aws_s3_bucket.this
+
 ```
 
 Exam line:
 
 ```text
 Refactoring means changing Terraform structure, not necessarily changing real infrastructure.
+
 ```
 
----
+----------
 
 ## 10.5 Rename a Resource
 
@@ -838,12 +924,14 @@ Before:
 resource "aws_s3_bucket" "logs" {
   bucket = "app1-logs"
 }
+
 ```
 
 Address:
 
 ```bash
 aws_s3_bucket.logs
+
 ```
 
 After rename:
@@ -852,12 +940,14 @@ After rename:
 resource "aws_s3_bucket" "application_logs" {
   bucket = "app1-logs"
 }
+
 ```
 
 New address:
 
 ```bash
 aws_s3_bucket.application_logs
+
 ```
 
 Terraform may think:
@@ -865,6 +955,7 @@ Terraform may think:
 ```text
 Destroy old
 Create new
+
 ```
 
 Use moved block:
@@ -874,6 +965,7 @@ moved {
   from = aws_s3_bucket.logs
   to   = aws_s3_bucket.application_logs
 }
+
 ```
 
 Then:
@@ -881,15 +973,17 @@ Then:
 ```bash
 terraform plan
 terraform apply
+
 ```
 
 Or manual state move:
 
 ```bash
 terraform state mv aws_s3_bucket.logs aws_s3_bucket.application_logs
+
 ```
 
----
+----------
 
 ## 10.6 Remove a Resource from State Without Destroying Infrastructure
 
@@ -899,12 +993,14 @@ Command:
 
 ```bash
 terraform state rm <resource_address>
+
 ```
 
 Example:
 
 ```bash
 terraform state rm aws_s3_bucket.logs
+
 ```
 
 What happens:
@@ -913,6 +1009,7 @@ What happens:
 Terraform forgets the resource
 Real infrastructure remains
 Resource is removed from state
+
 ```
 
 Terraform does not call the cloud/provider delete Application Programming Interface.
@@ -925,6 +1022,7 @@ You imported something by mistake
 You are handing management to another Terraform state
 You are splitting state files
 You want to stop tracking but keep the infrastructure
+
 ```
 
 Important danger:
@@ -933,6 +1031,7 @@ If the resource block still exists in configuration after `state rm`, then next 
 
 ```text
 Create new resource
+
 ```
 
 because Terraform sees:
@@ -941,17 +1040,19 @@ because Terraform sees:
 Configuration wants it
 State does not have it
 So Terraform wants to create it
+
 ```
 
 Correct pattern if you want Terraform to forget but keep infra:
 
 ```bash
 terraform state rm aws_s3_bucket.logs
+
 ```
 
 Then also remove/comment the resource from configuration.
 
----
+----------
 
 ## 10.7 Destroy a Resource
 
@@ -960,18 +1061,21 @@ Destroy means:
 ```text
 Delete real infrastructure
 Remove it from state
+
 ```
 
 Destroy everything:
 
 ```bash
 terraform destroy
+
 ```
 
 Destroy one resource:
 
 ```bash
 terraform destroy -target=aws_s3_bucket.logs
+
 ```
 
 Safer:
@@ -979,6 +1083,7 @@ Safer:
 ```bash
 terraform plan -destroy
 terraform destroy
+
 ```
 
 Important:
@@ -986,19 +1091,54 @@ Important:
 ```text
 terraform destroy deletes actual infrastructure.
 terraform state rm does not delete actual infrastructure.
+
 ```
 
 Clean distinction:
 
-| Action                     | Real Infrastructure | Terraform State |
-| -------------------------- | ------------------: | --------------: |
-| Remove from config + apply |           Destroyed |         Removed |
-| `terraform state rm`       |                Kept |         Removed |
-| `terraform destroy`        |           Destroyed |         Removed |
-| `terraform state mv`       |                Kept | Address changed |
-| `moved` block              |                Kept | Address changed |
+| Action                     | 
 
----
+Real Infrastructure | 
+
+Terraform State |
+| -------------------------- | ------------------: | --------------: |
+| Remove from config + apply |           Destroyed |         
+
+Remove from config + apply
+
+Destroyed
+
+Removed |
+| 
+
+`terraform state rm`       |                Kept |         
+
+Kept
+
+Removed |
+| 
+
+`terraform destroy`        |           Destroyed |         
+
+Destroyed
+
+Removed |
+| 
+
+`terraform state mv`       |                
+
+Kept | 
+
+Address changed |
+| 
+
+`moved` block              |                
+
+Kept | 
+
+Address changed |
+
+----------
 
 ## 10.8 Retire a Resource from Cloud Provider or State File
 
@@ -1012,12 +1152,14 @@ Use:
 
 ```bash
 terraform destroy -target=<resource_address>
+
 ```
 
 or remove it from configuration and run:
 
 ```bash
 terraform apply
+
 ```
 
 Result:
@@ -1025,9 +1167,10 @@ Result:
 ```text
 Real object deleted
 State updated
+
 ```
 
----
+----------
 
 ### Retire from Terraform management only
 
@@ -1037,6 +1180,7 @@ Use:
 
 ```bash
 terraform state rm <resource_address>
+
 ```
 
 Then remove it from configuration.
@@ -1046,9 +1190,10 @@ Result:
 ```text
 Real object remains
 Terraform forgets it
+
 ```
 
----
+----------
 
 ## 11. Data Sources
 
@@ -1062,6 +1207,7 @@ Resource:
 resource "aws_s3_bucket" "logs" {
   bucket = "my-log-bucket"
 }
+
 ```
 
 This creates/manages a bucket.
@@ -1074,6 +1220,7 @@ data "aws_ami" "latest" {
 
   owners = ["amazon"]
 }
+
 ```
 
 This reads an existing Amazon Machine Image.
@@ -1085,23 +1232,35 @@ resource "aws_instance" "web" {
   ami           = data.aws_ami.latest.id
   instance_type = "t3.micro"
 }
+
 ```
 
 Difference:
 
-| Terraform Block | Purpose                      |
+| Terraform Block | 
+
+Purpose                      |
 | --------------- | ---------------------------- |
-| `resource`      | Create/manage infrastructure |
-| `data`          | Read existing infrastructure |
+| 
+
+`resource`      | 
+
+Create/manage infrastructure |
+| 
+
+`data`          | 
+
+Read existing infrastructure |
 
 Exam line:
 
 ```text
 Resources change infrastructure.
 Data sources only read information from existing infrastructure.
+
 ```
 
----
+----------
 
 # Core Commands Summary
 
@@ -1123,9 +1282,10 @@ terraform state mv <old_address> <new_address>
 terraform import <resource_address> <real_resource_id>
 terraform show
 terraform providers
+
 ```
 
----
+----------
 
 # Final Mental Model
 
@@ -1136,6 +1296,7 @@ Provider      = plugin that talks to platform API
 Resource      = object Terraform manages
 Data source   = object Terraform reads
 Apply         = makes real infrastructure match configuration
+
 ```
 
 Most important exam distinction:
@@ -1145,4 +1306,8 @@ Remove from configuration + apply = destroy real object.
 terraform state rm = forget object, keep real object.
 terraform destroy = delete real object and remove from state.
 moved block/state mv = rename or move tracking without destroying.
+
 ```
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbNTI3OTY2MDg1XX0=
+-->
