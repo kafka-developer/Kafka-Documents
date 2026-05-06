@@ -1,4 +1,3 @@
-
 # How You Create the Cluster
 
 ## 1. Plan Capacity First
@@ -263,5 +262,5 @@ heartbeat.interval.ms=15000
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzM0MTUzODQ3XX0=
+eyJoaXN0b3J5IjpbLTE3MTUzNzA5MDcsMzM0MTUzODQ3XX0=
 -->
