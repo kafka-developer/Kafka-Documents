@@ -1522,3 +1522,6 @@ security.protocol=SSL
 ssl.truststore.location=/path/client.truststore.jks
 ssl.truststore.password=password
 ```
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTE3NTY5ODQ5NTddfQ==
+-->
