@@ -1096,41 +1096,47 @@ terraform state rm does not delete actual infrastructure.
 
 Clean distinction:
 
-Action
+| Action                     | 
 
-Real Infrastructure
+Real Infrastructure | 
 
-Terraform State
+Terraform State |
+| -------------------------- | ------------------: | --------------: |
+| Remove from config + apply |           Destroyed |         
 
 Remove from config + apply
 
 Destroyed
 
-Removed
+Removed |
+| 
 
-`terraform state rm`
+`terraform state rm`       |                Kept |         
 
 Kept
 
-Removed
+Removed |
+| 
 
-`terraform destroy`
+`terraform destroy`        |           Destroyed |         
 
 Destroyed
 
-Removed
+Removed |
+| 
 
-`terraform state mv`
+`terraform state mv`       |                
 
-Kept
+Kept | 
 
-Address changed
+Address changed |
+| 
 
-`moved` block
+`moved` block              |                
 
-Kept
+Kept | 
 
-Address changed
+Address changed |
 
 ----------
 
@@ -1231,17 +1237,20 @@ resource "aws_instance" "web" {
 
 Difference:
 
-Terraform Block
+| Terraform Block | 
 
-Purpose
+Purpose                      |
+| --------------- | ---------------------------- |
+| 
 
-`resource`
+`resource`      | 
 
-Create/manage infrastructure
+Create/manage infrastructure |
+| 
 
-`data`
+`data`          | 
 
-Read existing infrastructure
+Read existing infrastructure |
 
 Exam line:
 
@@ -1300,5 +1309,5 @@ moved block/state mv = rename or move tracking without destroying.
 
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMjI5MzEzMzc5LC0xNzU2OTg0OTU3XX0=
+eyJoaXN0b3J5IjpbNTI3OTY2MDg1LC0xNzU2OTg0OTU3XX0=
 -->
