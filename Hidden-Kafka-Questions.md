@@ -142,13 +142,38 @@ For new Kafka deployments, KRaft is preferred.
 Example:
 
 ```properties
+# Defines what this Kafka node does:
+# broker = handles client produce/consume requests
+# controller = participates in KRaft metadata quorum management
 process.roles=broker,controller
+
+# Unique ID for this Kafka node in the cluster
+# Every broker/controller must have a different node.id
 node.id=1
 
+# listeners = actual network interfaces Kafka binds to
+# PLAINTEXT://broker1:9092  -> client/broker traffic
+# CONTROLLER://broker1:9093 -> KRaft controller quorum communication
 listeners=PLAINTEXT://broker1:9092,CONTROLLER://broker1:9093
+
+# Address clients and brokers use to connect back to this broker
+# Must be reachable from producers/consumers/other brokers
 advertised.listeners=PLAINTEXT://broker1:9092
 
+# Specifies which listener is used for controller quorum communication
+# Here, CONTROLLER listener handles KRaft metadata traffic
 controller.listener.names=CONTROLLER
+
+# List of all KRaft quorum controllers in the cluster
+# Format:
+# node.id@host:port
+#
+# broker1 -> node.id 1 using port 9093
+# broker2 -> node.id 2 using port 9093
+# broker3 -> node.id 3 using port 9093
+#
+# These controllers elect the active controller leader
+# and manage cluster metadata instead of ZooKeeper
 controller.quorum.voters=1@broker1:9093,2@broker2:9093,3@broker3:9093
 ```
 
