@@ -62,9 +62,7 @@ OSI Layer = Transport Layer
 
 ---
 
-### 4. # ZooKeeper zNodes & Leader Election — Final Notes
-
-# What is a zNode?
+### 4. What is a zNode? & How Zookeeper does Leader Election
 
 A **zNode (ZooKeeper Node)** is a small metadata object stored inside ZooKeeper’s hierarchical tree structure.
 
