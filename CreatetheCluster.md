@@ -242,10 +242,19 @@ Explain:
 Main properties:
 ```bash
 session.timeout.ms=45000
+# Time Kafka waits before declaring consumer dead if heartbeats are not received
+
 heartbeat.interval.ms=15000
+# How frequently consumer sends heartbeat to Kafka broker to stay alive in consumer group
+
 max.poll.interval.ms=600000
+# Maximum allowed time between two poll() calls before consumer is considered stuck/dead
+
 request.timeout.ms=120000
+# Maximum time client waits for broker response before request times out
+
 connections.max.idle.ms=900000
+# Closes idle TCP connections after specified time to free resources
 ```
 Explain:
 > To avoid consumer timeout, I tune `session.timeout.ms`, `heartbeat.interval.ms`, and especially `max.poll.interval.ms`. If message processing takes longer, `max.poll.interval.ms` must be increased so Kafka does not consider the consumer dead and trigger a rebalance.
