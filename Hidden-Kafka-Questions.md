@@ -62,240 +62,39 @@ OSI Layer = Transport Layer
 
 ---
 
-### 4. What is a zNode? & How Zookeeper does Leader Election
+### 4. What are zNodes? Explain Zookeeper leader election.
 
-A **zNode (ZooKeeper Node)** is a small metadata object stored inside ZooKeeper’s hierarchical tree structure.
+**Answer —** zNodes are like files/directories inside Zookeeper’s internal metadata tree.
 
 Example:
 
 ```text
-/brokers
 /brokers/ids/1
+/brokers/topics/orders
 /controller
-/election
+/admin/delete_topics
 ```
 
-Kafka uses zNodes to store:
-- broker metadata
-- controller info
-- configs
-- leader election state
+Kafka stores cluster metadata in these zNodes.
 
----
-
-# Types of zNodes
-
-# 1. Persistent zNode
-
-Exists until manually deleted.
-
-Example:
+Zookeeper leader election works like this:
 
 ```text
-/brokers
+1. Multiple Zookeeper nodes start.
+2. Each node votes.
+3. The node with the best/latest transaction ID usually wins.
+4. One node becomes Leader.
+5. Others become Followers.
+6. If Leader dies, another election happens.
 ```
 
-Even if client disconnects:
-- zNode remains.
-
-## Used For
-- configuration
-- static metadata
-- cluster information
-
----
-
-# 2. Ephemeral zNode
-
-Exists only while client session is alive.
-
-If client crashes/disconnects:
-- ZooKeeper automatically deletes it.
-
-Example:
+Zookeeper should normally run with an odd number of nodes:
 
 ```text
-/brokers/ids/1
+3 nodes = can tolerate 1 failure
+5 nodes = can tolerate 2 failures
 ```
 
-If Broker-1 dies:
-- ZooKeeper removes this zNode automatically.
-
-## Used For
-- broker registration
-- heartbeat/presence detection
-- temporary ownership
-
----
-
-# 3. Sequential zNode
-
-ZooKeeper appends an increasing sequence number automatically.
-
-Example request:
-
-```text
-/election/node-
-```
-
-ZooKeeper creates:
-
-```text
-/election/node-0000001
-/election/node-0000002
-/election/node-0000003
-```
-
-## Used For
-- ordering
-- distributed locks
-- leader election
-
----
-
-# 4. Ephemeral Sequential zNode
-
-Combination of:
-- Ephemeral
-- Sequential
-
-Example:
-
-```text
-/election/node-0000001
-```
-
-If node dies:
-- zNode disappears automatically.
-
-## Most Important Type
-
-Used heavily in:
-- distributed leader election
-- coordination systems
-
----
-
-# ZooKeeper Leader Election Using Ephemeral Sequential zNodes
-
-Suppose 3 nodes want leadership.
-
-Each creates:
-
-```text
-/election/node-
-```
-
-ZooKeeper generates:
-
-```text
-/election/node-0000001
-/election/node-0000002
-/election/node-0000003
-```
-
----
-
-# Election Rule
-
-```text
-Lowest sequence number becomes leader
-```
-
-So:
-
-```text
-node-0000001 = Leader
-```
-
----
-
-# Watch Mechanism
-
-Instead of all nodes watching the leader:
-
-```text
-node-0000002 watches node-0000001
-node-0000003 watches node-0000002
-```
-
-Each node watches:
-```text
-the zNode immediately before it
-```
-
-This avoids:
-
-```text
-Herd Effect
-```
-
-(Herd effect = too many notifications hitting ZooKeeper simultaneously)
-
----
-
-# Leader Failure
-
-Suppose:
-
-```text
-node-0000001
-```
-
-dies.
-
-Because it is:
-
-```text
-Ephemeral
-```
-
-ZooKeeper automatically deletes it.
-
----
-
-# Automatic Failover
-
-Now remaining:
-
-```text
-node-0000002
-node-0000003
-```
-
-Since:
-
-```text
-node-0000002
-```
-
-is now the lowest sequence:
-- it becomes new leader automatically.
-
-Then:
-
-```text
-node-0000003
-```
-
-starts watching:
-
-```text
-node-0000002
-```
-
----
-
-# Why This Design Is Powerful
-
-Provides:
-- automatic failover
-- distributed coordination
-- ordered leadership
-- no split brain
-- low notification overhead
-
-without centralized coordination logic.
 ---
 
 # Kraft
@@ -343,38 +142,13 @@ For new Kafka deployments, KRaft is preferred.
 Example:
 
 ```properties
-# Defines what this Kafka node does:
-# broker = handles client produce/consume requests
-# controller = participates in KRaft metadata quorum management
 process.roles=broker,controller
-
-# Unique ID for this Kafka node in the cluster
-# Every broker/controller must have a different node.id
 node.id=1
 
-# listeners = actual network interfaces Kafka binds to
-# PLAINTEXT://broker1:9092  -> client/broker traffic
-# CONTROLLER://broker1:9093 -> KRaft controller quorum communication
 listeners=PLAINTEXT://broker1:9092,CONTROLLER://broker1:9093
-
-# Address clients and brokers use to connect back to this broker
-# Must be reachable from producers/consumers/other brokers
 advertised.listeners=PLAINTEXT://broker1:9092
 
-# Specifies which listener is used for controller quorum communication
-# Here, CONTROLLER listener handles KRaft metadata traffic
 controller.listener.names=CONTROLLER
-
-# List of all KRaft quorum controllers in the cluster
-# Format:
-# node.id@host:port
-#
-# broker1 -> node.id 1 using port 9093
-# broker2 -> node.id 2 using port 9093
-# broker3 -> node.id 3 using port 9093
-#
-# These controllers elect the active controller leader
-# and manage cluster metadata instead of ZooKeeper
 controller.quorum.voters=1@broker1:9093,2@broker2:9093,3@broker3:9093
 ```
 
