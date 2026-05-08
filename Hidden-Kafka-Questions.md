@@ -62,180 +62,242 @@ OSI Layer = Transport Layer
 
 ---
 
-### 4. ZooKeeper zNodes & Leader Election — Final Notes
-What is a zNode?
+### 4. # ZooKeeper zNodes & Leader Election — Final Notes
 
-A zNode (ZooKeeper Node) is a small metadata object stored inside ZooKeeper’s hierarchical tree structure.
+# What is a zNode?
+
+A **zNode (ZooKeeper Node)** is a small metadata object stored inside ZooKeeper’s hierarchical tree structure.
 
 Example:
 
+```text
 /brokers
 /brokers/ids/1
 /controller
 /election
+```
 
 Kafka uses zNodes to store:
+- broker metadata
+- controller info
+- configs
+- leader election state
 
-broker metadata
-controller info
-configs
-leader election state
-Types of zNodes
-1. Persistent zNode
+---
+
+# Types of zNodes
+
+# 1. Persistent zNode
 
 Exists until manually deleted.
 
 Example:
 
+```text
 /brokers
+```
 
 Even if client disconnects:
+- zNode remains.
 
-zNode remains.
-Used For
-configuration
-static metadata
-cluster information
-2. Ephemeral zNode
+## Used For
+- configuration
+- static metadata
+- cluster information
+
+---
+
+# 2. Ephemeral zNode
 
 Exists only while client session is alive.
 
 If client crashes/disconnects:
-
-ZooKeeper automatically deletes it.
+- ZooKeeper automatically deletes it.
 
 Example:
 
+```text
 /brokers/ids/1
+```
 
 If Broker-1 dies:
+- ZooKeeper removes this zNode automatically.
 
-ZooKeeper removes this zNode automatically.
-Used For
-broker registration
-heartbeat/presence detection
-temporary ownership
-3. Sequential zNode
+## Used For
+- broker registration
+- heartbeat/presence detection
+- temporary ownership
+
+---
+
+# 3. Sequential zNode
 
 ZooKeeper appends an increasing sequence number automatically.
 
 Example request:
 
+```text
 /election/node-
+```
 
 ZooKeeper creates:
 
+```text
 /election/node-0000001
 /election/node-0000002
 /election/node-0000003
-Used For
-ordering
-distributed locks
-leader election
-4. Ephemeral Sequential zNode
+```
+
+## Used For
+- ordering
+- distributed locks
+- leader election
+
+---
+
+# 4. Ephemeral Sequential zNode
 
 Combination of:
-
-Ephemeral
-Sequential
+- Ephemeral
+- Sequential
 
 Example:
 
+```text
 /election/node-0000001
+```
 
 If node dies:
+- zNode disappears automatically.
 
-zNode disappears automatically.
-Most Important Type
+## Most Important Type
 
 Used heavily in:
+- distributed leader election
+- coordination systems
 
-distributed leader election
-coordination systems
-ZooKeeper Leader Election Using Ephemeral Sequential zNodes
+---
+
+# ZooKeeper Leader Election Using Ephemeral Sequential zNodes
 
 Suppose 3 nodes want leadership.
 
 Each creates:
 
+```text
 /election/node-
+```
 
 ZooKeeper generates:
 
+```text
 /election/node-0000001
 /election/node-0000002
 /election/node-0000003
-Election Rule
+```
+
+---
+
+# Election Rule
+
+```text
 Lowest sequence number becomes leader
+```
 
 So:
 
+```text
 node-0000001 = Leader
-Watch Mechanism
+```
+
+---
+
+# Watch Mechanism
 
 Instead of all nodes watching the leader:
 
+```text
 node-0000002 watches node-0000001
 node-0000003 watches node-0000002
+```
 
 Each node watches:
-
+```text
 the zNode immediately before it
+```
 
 This avoids:
 
+```text
 Herd Effect
+```
 
 (Herd effect = too many notifications hitting ZooKeeper simultaneously)
 
-Leader Failure
+---
+
+# Leader Failure
 
 Suppose:
 
+```text
 node-0000001
+```
 
 dies.
 
 Because it is:
 
+```text
 Ephemeral
+```
 
 ZooKeeper automatically deletes it.
 
-Automatic Failover
+---
+
+# Automatic Failover
 
 Now remaining:
 
+```text
 node-0000002
 node-0000003
+```
 
 Since:
 
+```text
 node-0000002
+```
 
 is now the lowest sequence:
-
-it becomes new leader automatically.
+- it becomes new leader automatically.
 
 Then:
 
+```text
 node-0000003
+```
 
 starts watching:
 
+```text
 node-0000002
-Why This Design Is Powerful
+```
+
+---
+
+# Why This Design Is Powerful
 
 Provides:
-
-automatic failover
-distributed coordination
-ordered leadership
-no split brain
-low notification overhead
+- automatic failover
+- distributed coordination
+- ordered leadership
+- no split brain
+- low notification overhead
 
 without centralized coordination logic.
-
 ---
 
 # Kraft
