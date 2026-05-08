@@ -62,38 +62,179 @@ OSI Layer = Transport Layer
 
 ---
 
-### 4. What are zNodes? Explain Zookeeper leader election.
+### 4. ZooKeeper zNodes & Leader Election — Final Notes
+What is a zNode?
 
-**Answer —** zNodes are like files/directories inside Zookeeper’s internal metadata tree.
+A zNode (ZooKeeper Node) is a small metadata object stored inside ZooKeeper’s hierarchical tree structure.
 
 Example:
 
-```text
+/brokers
 /brokers/ids/1
-/brokers/topics/orders
 /controller
-/admin/delete_topics
-```
+/election
 
-Kafka stores cluster metadata in these zNodes.
+Kafka uses zNodes to store:
 
-Zookeeper leader election works like this:
+broker metadata
+controller info
+configs
+leader election state
+Types of zNodes
+1. Persistent zNode
 
-```text
-1. Multiple Zookeeper nodes start.
-2. Each node votes.
-3. The node with the best/latest transaction ID usually wins.
-4. One node becomes Leader.
-5. Others become Followers.
-6. If Leader dies, another election happens.
-```
+Exists until manually deleted.
 
-Zookeeper should normally run with an odd number of nodes:
+Example:
 
-```text
-3 nodes = can tolerate 1 failure
-5 nodes = can tolerate 2 failures
-```
+/brokers
+
+Even if client disconnects:
+
+zNode remains.
+Used For
+configuration
+static metadata
+cluster information
+2. Ephemeral zNode
+
+Exists only while client session is alive.
+
+If client crashes/disconnects:
+
+ZooKeeper automatically deletes it.
+
+Example:
+
+/brokers/ids/1
+
+If Broker-1 dies:
+
+ZooKeeper removes this zNode automatically.
+Used For
+broker registration
+heartbeat/presence detection
+temporary ownership
+3. Sequential zNode
+
+ZooKeeper appends an increasing sequence number automatically.
+
+Example request:
+
+/election/node-
+
+ZooKeeper creates:
+
+/election/node-0000001
+/election/node-0000002
+/election/node-0000003
+Used For
+ordering
+distributed locks
+leader election
+4. Ephemeral Sequential zNode
+
+Combination of:
+
+Ephemeral
+Sequential
+
+Example:
+
+/election/node-0000001
+
+If node dies:
+
+zNode disappears automatically.
+Most Important Type
+
+Used heavily in:
+
+distributed leader election
+coordination systems
+ZooKeeper Leader Election Using Ephemeral Sequential zNodes
+
+Suppose 3 nodes want leadership.
+
+Each creates:
+
+/election/node-
+
+ZooKeeper generates:
+
+/election/node-0000001
+/election/node-0000002
+/election/node-0000003
+Election Rule
+Lowest sequence number becomes leader
+
+So:
+
+node-0000001 = Leader
+Watch Mechanism
+
+Instead of all nodes watching the leader:
+
+node-0000002 watches node-0000001
+node-0000003 watches node-0000002
+
+Each node watches:
+
+the zNode immediately before it
+
+This avoids:
+
+Herd Effect
+
+(Herd effect = too many notifications hitting ZooKeeper simultaneously)
+
+Leader Failure
+
+Suppose:
+
+node-0000001
+
+dies.
+
+Because it is:
+
+Ephemeral
+
+ZooKeeper automatically deletes it.
+
+Automatic Failover
+
+Now remaining:
+
+node-0000002
+node-0000003
+
+Since:
+
+node-0000002
+
+is now the lowest sequence:
+
+it becomes new leader automatically.
+
+Then:
+
+node-0000003
+
+starts watching:
+
+node-0000002
+Why This Design Is Powerful
+
+Provides:
+
+automatic failover
+distributed coordination
+ordered leadership
+no split brain
+low notification overhead
+
+without centralized coordination logic.
 
 ---
 
