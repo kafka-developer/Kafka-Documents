@@ -1584,3 +1584,6 @@ Important interview line:
 ```text
 Rack awareness ensures Kafka replicas are distributed across failure domains instead of being concentrated in same physical infrastructure.
 ```
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTE5MjEwNTcyMzVdfQ==
+-->
